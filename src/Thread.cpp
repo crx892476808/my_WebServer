@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 11:59:10
- * @LastEditTime: 2022-05-11 12:30:33
+ * @LastEditTime: 2022-05-11 19:38:20
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -15,8 +15,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <memory>
-#include "CurrentThread.h"
+#include "mylib/CurrentThread.h"
 #include <functional>
+#include <iostream>
 using namespace std;
 
 // Thread control
@@ -39,7 +40,10 @@ struct ThreadData{
         func_(func), name_(name), tid_(tid), latch_(latch){}
 
     void runInThread(){
+        std::cout << "runInThread(): *tid_=" << *tid_ << std::endl;
+        std::cout << "in sub thread, the address of tid_ is" << tid_ << std::endl;
         *tid_ = CurrentThread::tid();
+        std::cout << "runInThread(): *tid_=" << *tid_ << std::endl;
         tid_ = NULL;
         latch_->countDown();
         latch_ = NULL;
@@ -58,12 +62,12 @@ void *startThread(void *obj){
     return NULL;
 }
 
-Thread::Thread(const ThreadFunc& func, const string& n)
+Thread::Thread( const string& n)
     : started_(false),
       joined_(false),
       pthreadId_(0),
       tid_(0),
-      func_(func),
+      func_(std::bind(&Thread::threadFunc,this)),
       name_(n),
       latch_(1),
 
@@ -99,7 +103,8 @@ void Thread::start(){
     }
     else{ //为0表示创建成功，并且子线程开始执行 (子线程从start_routine函数的起点地址开始运行)
         latch_.wait(); //确保func_确实执行后，start()才返回
-        assert(tid_ > 0); 
+        std::cout << "in main thread, the address of tid_ is" << &tid_ << std::endl;
+        assert(tid_ > 0);  //表明子线程已经成功运行起来(否则不会改变tid_)
     }
 }
 
@@ -128,6 +133,7 @@ Reactor* Thread::startLoop(){
 }
 
 void Thread::threadFunc(){
+    std::cout << "in thread Func()" << std::endl;
     Reactor reactor;
     {
         MutexLockGuard lock(mutex_);
@@ -136,4 +142,14 @@ void Thread::threadFunc(){
     }
     reactor.loop();
     reactor_ = nullptr;
+}
+
+pid_t gettid() { return static_cast<pid_t>(::syscall(SYS_gettid)); }
+
+void CurrentThread::cacheTid() {
+  if (t_cachedTid == 0) {
+    t_cachedTid = gettid();
+    t_tidStringLength =
+        snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
+  }
 }

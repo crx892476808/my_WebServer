@@ -1,22 +1,23 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 12:55:46
- * @LastEditTime: 2022-05-10 13:45:55
+ * @LastEditTime: 2022-05-11 19:27:23
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
 
 #include"CountDownLatch.h"
-
+#include<iostream>
 CountDownLatch::CountDownLatch(int count): count_(count), mutex_(), condition_(mutex_){}
 
 void CountDownLatch::wait(){
     MutexLockGuard lock(mutex_); //析构函数中自动解锁
-    count_++;
-    condition_.wait();
+    while(count_ == 1)
+        condition_.wait();
 }
 
 void CountDownLatch::countDown(){
+    std::cout << "CountDownLatch::countDown()" << std::endl; 
     MutexLockGuard lock(mutex_); //析构函数中自动解锁
     count_--;
     if(count_ == 0){

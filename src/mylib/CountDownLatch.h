@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 12:07:21
- * @LastEditTime: 2022-05-10 13:47:11
+ * @LastEditTime: 2022-05-11 19:29:31
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -19,7 +19,7 @@ public:
     void wait();
     void countDown();
 private:
+    int count_;
     MutexLock mutex_;
     Condition condition_;
-    int count_;
 };

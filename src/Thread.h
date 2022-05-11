@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 07:42:45
- * @LastEditTime: 2022-05-11 12:28:13
+ * @LastEditTime: 2022-05-11 18:42:13
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -9,18 +9,21 @@
 #include<pthread.h>
 #include<functional>
 #include<string>
+#include <sys/syscall.h>
 #include"mylib/Noncopyable.h"
 #include"mylib/MutexLock.h"
 #include"mylib/Condition.h"
 #include"mylib/CountDownLatch.h"
 #include"Reactor.h"
 
+class ThreadPool;
+
 class Thread: Noncopyable // 专用于Reactor, 对pthread_t进行封装
 {
 public:
     // Thread control
     typedef std::function<void()> ThreadFunc;
-    explicit Thread(const ThreadFunc&, const std::string &name = std::string());
+    explicit Thread( const std::string &name = std::string());
     ~Thread();
     void start();
     int join();
