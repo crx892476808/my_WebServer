@@ -3,10 +3,11 @@
     "fileheader.customMade": {
         // 头部注释默认字段
         "Author": "Armin Jager",
-        //"Date": "Do not edit", // 设置后默认设置文件生成时间
-        //"LastEditTime": "Do not edit", // 设置后，保存文件更改默认更新最后编辑时间
-        //"LastEditors": "your name", // 设置后，保存文件更改默认更新最后编辑人
-        "Description": "",
+        //"Email": "rickjagerchen@gmail.com",
+        "Date": "Do not edit", // 设置后默认设置文件生成时间
+        "LastEditTime": "Do not edit", // 设置后，保存文件更改默认更新最后编辑时间
+        "LastEditors": "Armin Jager", // 设置后，保存文件更改默认更新最后编辑人
+        "Description": "Date +8h",
         //"FilePath": "Do not edit", // 设置后，默认生成文件相对于项目的路径
         //"custom_string_obkoro1": "可以输入预定的版权声明、个性签名、空行等"
     },
@@ -125,8 +126,14 @@
         },
     },
     "files.associations": {
-        "adc.h": "c"
-    }
+        "*.vue": "vue",
+        "*.wpy": "vue",
+        "adc.h": "c",
+        "functional": "cpp",
+        "algorithm": "cpp"
+    },
+    //"editor.formatOnType": true,
+
         
 }
 
