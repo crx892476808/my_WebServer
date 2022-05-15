@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 07:42:45
- * @LastEditTime: 2022-05-11 18:42:13
+ * @LastEditTime: 2022-05-15 13:03:31
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -18,7 +18,7 @@
 
 class ThreadPool;
 
-class Thread: Noncopyable // 专用于Reactor, 对pthread_t进行封装
+class Thread: Noncopyable // 专用于SubReactor, 对pthread_t进行封装
 {
 public:
     // Thread control

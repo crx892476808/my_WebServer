@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed May 11 15:25:39 2022
+# Make data base, printed on Sun May 15 09:47:11 2022
 
 # Variables
 
@@ -39,7 +39,7 @@ VSCODE_NLS_CONFIG = {"locale":"en","availableLanguages":{}}
 # environment
 TZ = Asia/Shanghai
 # environment
-_ = /home/crx1/.vscode-server/bin/57fd6d0195bb9b9d1b49f6da5db789060795de47/node
+_ = /home/crx1/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/node
 # makefile
 MAKEFILE_LIST := 
 # 'override' directive
@@ -53,9 +53,9 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 VSCODE_CWD = /home/crx1
 # environment
-SSH_CONNECTION = 10.230.32.236 57629 10.176.35.12 22
+SSH_CONNECTION = 10.230.34.254 64981 10.176.35.12 22
 # environment
-PATH = /home/crx1/.vscode-server/bin/57fd6d0195bb9b9d1b49f6da5db789060795de47/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/crx1/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -69,7 +69,7 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/crx1/crx/learn_cpp/my_WebServer
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-8f00c4b8-b08b-4d86-8281-7060e68f40e7.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-156bdd1f-fb7d-4966-9385-8c4a1b758afb.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -79,7 +79,7 @@ HOME = /home/crx1
 # environment
 LOGNAME = crx1
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # automatic
 +F = $(notdir $+)
 # environment
@@ -95,7 +95,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 478
+XDG_SESSION_ID = 597
 # environment
 USER = crx1
 # makefile
@@ -113,13 +113,13 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 10.230.32.236 57629 22
+SSH_CLIENT = 10.230.34.254 64981 22
 # environment
 MAIL = /var/mail/crx1
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /home/crx1/.vscode-server/bin/57fd6d0195bb9b9d1b49f6da5db789060795de47/bin/helpers/browser.sh
+BROWSER = /home/crx1/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/bin/helpers/browser.sh
 # environment
 VSCODE_HANDLES_SIGPIPE = true
 # default
@@ -211,6 +211,6 @@ GNUmakefile:
 # strcache performance: lookups = 18 / hit rate = 16%
 # hash-table stats:
 # Load=15/8192=0%, Rehash=0, Collisions=1/18=6%
-# Finished Make data base on Wed May 11 15:25:39 2022
+# Finished Make data base on Sun May 15 09:47:11 2022
 
  
