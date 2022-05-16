@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "Epoll.h"
-#include "Event.h"
+#include "Channel.h"
 
 int main() {
     std::cout << "This is server" << std::endl;
@@ -54,12 +54,12 @@ int main() {
         std::cout << "...connect " << clientIP << ":" << ntohs(clientAddr.sin_port) << std::endl;
         
         std::cout << "new fd = " << conn << std::endl;
-        std::shared_ptr<Event> event(new Event);
+        std::shared_ptr<Channel> event(new Channel);
         event->fd_ = conn;
         event->eventFlag_ = EPOLLIN | EPOLLET;
         epoll.epoll_add(event, 0);
         while(true){
-            std::vector<std::shared_ptr<Event>> ret = epoll.poll();
+            std::vector<std::shared_ptr<Channel>> ret = epoll.poll();
             if(ret.size() > 0){
                 std::cout << "recive from client!" << std::endl;
             }

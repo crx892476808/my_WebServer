@@ -1,11 +1,11 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 14:02:07
- * @LastEditTime: 2022-05-15 15:20:43
+ * @LastEditTime: 2022-05-16 23:18:32
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
-#include"Event.h"
+#include"Channel.h"
 
 #include<memory>
 #include<vector>
@@ -16,11 +16,11 @@ class Epoll{ //封装 sys/epoll.h
 public:
     Epoll();
     ~Epoll();
-    void epoll_add(std::shared_ptr<Event> event, int timeout);
-    std::vector<std::shared_ptr<Event>> poll();
+    void epoll_add(std::shared_ptr<Channel> event, int timeout);
+    std::vector<std::shared_ptr<Channel>> poll();
 private:
     int epollFd_;
     std::vector<struct epoll_event> epollEvents_;
-    std::vector<std::shared_ptr<Event>> getEvents(int eventNum);
-    std::unordered_map<int, std::shared_ptr<Event>> fd2event;
+    std::vector<std::shared_ptr<Channel>> getEvents(int eventNum);
+    std::unordered_map<int, std::shared_ptr<Channel>> fd2event;
 };
