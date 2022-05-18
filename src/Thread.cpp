@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 11:59:10
- * @LastEditTime: 2022-05-11 19:38:20
+ * @LastEditTime: 2022-05-17 14:05:01
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -40,10 +40,7 @@ struct ThreadData{
         func_(func), name_(name), tid_(tid), latch_(latch){}
 
     void runInThread(){
-        std::cout << "runInThread(): *tid_=" << *tid_ << std::endl;
-        std::cout << "in sub thread, the address of tid_ is" << tid_ << std::endl;
         *tid_ = CurrentThread::tid();
-        std::cout << "runInThread(): *tid_=" << *tid_ << std::endl;
         tid_ = NULL;
         latch_->countDown();
         latch_ = NULL;
@@ -103,7 +100,6 @@ void Thread::start(){
     }
     else{ //为0表示创建成功，并且子线程开始执行 (子线程从start_routine函数的起点地址开始运行)
         latch_.wait(); //确保func_确实执行后，start()才返回
-        std::cout << "in main thread, the address of tid_ is" << &tid_ << std::endl;
         assert(tid_ > 0);  //表明子线程已经成功运行起来(否则不会改变tid_)
     }
 }
@@ -133,7 +129,6 @@ Reactor* Thread::startLoop(){
 }
 
 void Thread::threadFunc(){
-    std::cout << "in thread Func()" << std::endl;
     Reactor reactor;
     {
         MutexLockGuard lock(mutex_);

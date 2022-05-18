@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 08:41:15
- * @LastEditTime: 2022-05-16 22:01:21
+ * @LastEditTime: 2022-05-17 20:36:25
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -15,21 +15,31 @@ class Reactor{
 public:
     typedef std::function<void()> Functor;
     Reactor();
-    //~Reactor();
+    ~Reactor();
     void quit();
     void loop();
+    void runInLoop(Functor);
+    void queueInLoop(Functor);
+    void wakeup();//当前线程唤醒该Reactor对应的子线程
 
 private:
-    bool looping_;
+    bool looping_; // 是否处于Reactor::loop()过程中
+    bool eventHandling_; //是否在loop()中处于处理每个事件的阶段
+public:
     Epoll poller_;
+private:
     int wakeupFd_;
     bool quit_;
-    bool eventHandling_;
     mutable MutexLock mutex_; //mutable: 在const成员函数也可以修改
-    std::vector<Functor> pendingFunctors_;
-    bool callingPendingFunctors_;
-    const pid_t threadId_ = 0;
-    std::shared_ptr<Channel> pWakeupEvent_;
+    std::vector<Functor> pendingFunctors_;//queueInLoop作用的位置，实际上是一个待调用函数的队列？
+    bool callingPendingFunctors_; //是否处于调用pending Functor调用过程中
+    const pid_t threadId_;
+    std::shared_ptr<Channel> pWakeupChannel;
     
-
+    
+    void handleRead(); //处理"被唤醒"事件
+    void handleConn(); //更新eventFlag
+    void doPendingFunctors(); //将pendingFunctors_中的函数逐个取出完成
+public:
+    void mainReactorHandleRead(); //主Reactor接收到读事件，也就是有新的连接被建立
 };

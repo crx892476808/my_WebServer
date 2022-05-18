@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 13:11:31
- * @LastEditTime: 2022-05-16 23:23:28
+ * @LastEditTime: 2022-05-17 17:34:55
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -12,19 +12,22 @@
 class Reactor;
 
 class Channel{
+private:
+    typedef std::function<void()> CallBack;
 public:
-    int fd_; // 事件对应的文件描述符
+    Channel(Reactor*,int);
+    
+    int fd_; // 信道对应的文件描述符
     uint32_t eventFlag_; //原项目的events_, 对应epoll_event::events
     uint32_t returnEventFlag_; //原项目的Channel::revents_
     uint32_t lastEventFlag_; //上一次的eventFlag
-
-private:
     Reactor *reactor_;
-    typedef std::function<void()> CallBack;
-    CallBack readHandler_;
-    CallBack writeHandler_;
-    CallBack errorHandler_;
-    CallBack connHandler_;
+    
+    void setReadHandler(CallBack readHandler){readHandler_ = readHandler;}
+    void setWriteHandler(CallBack writeHandler){writeHandler_ = writeHandler;}
+    void setErrorHandler(CallBack errorHandler){errorHandler_ = errorHandler;}
+    void setConnHandler(CallBack connHandler){connHandler_ = connHandler;}
+
     void handleEvent(){
         if( (returnEventFlag_ & EPOLLHUP) && !(returnEventFlag_ & EPOLLIN)){ //EPOLLHUP表示文件被挂断。EPOLLIN表示有新数据到达，socket可读，或对端写通道关闭
             //TODO: handle error
@@ -43,4 +46,18 @@ private:
             connHandler_();
         }
     }
+
+    
+
+private:
+    
+    
+    CallBack readHandler_;
+    CallBack writeHandler_;
+    CallBack errorHandler_;
+    CallBack connHandler_;
+
+
+
+
 };

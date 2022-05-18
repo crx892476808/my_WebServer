@@ -17,7 +17,7 @@ clean :
 	find ../build -name '*.o' | xargs rm -f
 
 ../build/%.o : %.cpp
-	g++ -std=c++11 -g -Wall -O3 -D_PTHREADS   -c -o $@ $^
+	g++ -std=c++11 -g -Wall -O3 -D_PTHREADS   -g -c -o $@ $^
 
 # ../build/Server.o: Server.cpp
 # 	g++ -std=c++11 -g -Wall -O3 -D_PTHREADS   -c -o $@ $^

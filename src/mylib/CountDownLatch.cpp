@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 12:55:46
- * @LastEditTime: 2022-05-11 19:27:23
+ * @LastEditTime: 2022-05-17 14:05:36
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -17,7 +17,6 @@ void CountDownLatch::wait(){
 }
 
 void CountDownLatch::countDown(){
-    std::cout << "CountDownLatch::countDown()" << std::endl; 
     MutexLockGuard lock(mutex_); //析构函数中自动解锁
     count_--;
     if(count_ == 0){

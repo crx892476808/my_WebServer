@@ -1,10 +1,12 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 14:02:07
- * @LastEditTime: 2022-05-16 23:18:32
+ * @LastEditTime: 2022-05-18 19:28:34
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
+#pragma once
+
 #include"Channel.h"
 
 #include<memory>
@@ -17,10 +19,12 @@ public:
     Epoll();
     ~Epoll();
     void epoll_add(std::shared_ptr<Channel> event, int timeout);
+    void epoll_modify(std::shared_ptr<Channel> channel, int timeout);
+    void epoll_delete(std::shared_ptr<Channel> channel, int timeout);
     std::vector<std::shared_ptr<Channel>> poll();
 private:
     int epollFd_;
     std::vector<struct epoll_event> epollEvents_;
     std::vector<std::shared_ptr<Channel>> getEvents(int eventNum);
-    std::unordered_map<int, std::shared_ptr<Channel>> fd2event;
+    std::unordered_map<int, std::shared_ptr<Channel>> fd2channel;
 };

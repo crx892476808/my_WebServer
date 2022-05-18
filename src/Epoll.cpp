@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 14:15:47
- * @LastEditTime: 2022-05-16 23:19:43
+ * @LastEditTime: 2022-05-18 19:33:54
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -24,16 +24,40 @@ Epoll::~Epoll(){
     
 }
 
-void Epoll::epoll_add(std::shared_ptr<Channel> event, int timeout){
-    int eventFd = event->fd_;
+void Epoll::epoll_add(std::shared_ptr<Channel> channel, int timeout){ //添加所要监听的文件描述符
+    int eventFd = channel->fd_;
     //TODO: Add timer 
     struct epoll_event ep_event; //The events member is a bit mask composed by ORing together zero or more of the following available event types
     ep_event.data.fd = eventFd;  
-    ep_event.events = event->eventFlag_;
-    fd2event[eventFd] = event;
-    std::cout << "Epoll::epoll_add() : eventFD=" << eventFd << " " << "epollFd=" << epollFd_ <<  std::endl;
+    ep_event.events = channel->eventFlag_;
+    fd2channel[eventFd] = channel;
     if(epoll_ctl(epollFd_, EPOLL_CTL_ADD, eventFd, &ep_event) < 0){
         std::cout << "Error occur in epoll_add" << std::endl;
+    }
+}
+
+void Epoll::epoll_modify(std::shared_ptr<Channel> channel, int timeout){
+    int channelFd = channel -> fd_;
+    //TODO: Add Timer
+    struct epoll_event ep_event;
+    ep_event.data.fd = channelFd;
+    ep_event.events = channel -> eventFlag_;
+    /* Change file descriptor epoll_event structure.  */
+    if(epoll_ctl(epollFd_, EPOLL_CTL_MOD, channelFd, &ep_event) < 0){
+        std::cout << "Error occur in epoll_modify" << std::endl;
+    }
+}
+
+void Epoll::epoll_delete(std::shared_ptr<Channel> channel, int timeout){
+    int channelFd = channel -> fd_;
+    //TODO: Add Timer
+    struct epoll_event ep_event;
+    ep_event.data.fd = channelFd;
+    ep_event.events = channel -> eventFlag_;
+    fd2channel.erase(channelFd);
+    /* Change file descriptor epoll_event structure.  */
+    if(epoll_ctl(epollFd_, EPOLL_CTL_DEL, channelFd, &ep_event) < 0){
+        std::cout << "Error occur in epoll_delete" << std::endl;
     }
 }
 
@@ -41,7 +65,7 @@ std::vector<std::shared_ptr<Channel>> Epoll::poll(){
     while(true){
         int event_count = epoll_wait(epollFd_, &(*epollEvents_.begin()), epollEvents_.size(), EPOLLWAIT_TIME);//refer to `man 2 epoll_wait`
         if(event_count < 0) std::cout << "Error in Epoll::poll()" << std::endl;
-        else if(event_count == 0) std::cout << "No available active fd" << std::endl;
+        else if(event_count == 0) ;//std::cout << "No available active fd" << std::endl;
         else std::cout << "available active fd" << std::endl;
         std::vector<std::shared_ptr<Channel>> events = getEvents(event_count);
         if(events.size() > 0) return events;
@@ -51,7 +75,7 @@ std::vector<std::shared_ptr<Channel>> Epoll::poll(){
 std::vector<std::shared_ptr<Channel>> Epoll::getEvents(int event_count){
     std::vector<std::shared_ptr<Channel>> events;
     for(int i = 0;i != event_count;i++){
-        std::shared_ptr<Channel> eventPtr = fd2event[epollEvents_[i].data.fd];
+        std::shared_ptr<Channel> eventPtr = fd2channel[epollEvents_[i].data.fd];
         if(eventPtr){
             eventPtr->returnEventFlag_ = epollEvents_[i].events;
             eventPtr->eventFlag_ = 0;
