@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
-
 # GNU Make 4.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2014 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed May 18 09:13:44 2022
+# Make data base, printed on Tue May 24 10:14:03 2022
 
 # Variables
 
@@ -39,7 +37,7 @@ VSCODE_NLS_CONFIG = {"locale":"en","availableLanguages":{}}
 # environment
 TZ = Asia/Shanghai
 # environment
-_ = /home/crx1/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/node
+_ = /home/crx1/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/node
 # makefile
 MAKEFILE_LIST := 
 # 'override' directive
@@ -53,9 +51,9 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 VSCODE_CWD = /home/crx1
 # environment
-SSH_CONNECTION = 10.230.35.58 51101 10.176.35.12 22
+SSH_CONNECTION = 10.230.37.224 52340 10.176.35.12 22
 # environment
-PATH = /home/crx1/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/crx1/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -69,7 +67,7 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/crx1/crx/learn_cpp/my_WebServer
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-52cd558a-e0f3-496f-907f-6f21a45621a0.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-4b77f85a-7aef-4c54-bc0a-f45ef2a9ec88.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -95,7 +93,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 684
+XDG_SESSION_ID = 865
 # environment
 USER = crx1
 # makefile
@@ -113,13 +111,13 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 10.230.35.58 51101 22
+SSH_CLIENT = 10.230.37.224 52340 22
 # environment
 MAIL = /var/mail/crx1
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /home/crx1/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/bin/helpers/browser.sh
+BROWSER = /home/crx1/.vscode-server/bin/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5/bin/helpers/browser.sh
 # environment
 VSCODE_HANDLES_SIGPIPE = true
 # default
@@ -153,9 +151,9 @@ VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 
 # Directories
 
-# . (device 64768, inode 8785629): 9 files, no impossibilities.
+# . (device 64768, inode 8785629): 10 files, no impossibilities.
 
-# 9 files, no impossibilities in 1 directories.
+# 10 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -205,12 +203,14 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 17 / storage = 141 B / avg = 8 B
-# current buf: size = 8162 B / used = 141 B / count = 17 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 18 / storage = 157 B / avg = 8 B
+# current buf: size = 8162 B / used = 157 B / count = 18 / avg = 8 B
 
-# strcache performance: lookups = 20 / hit rate = 15%
+# strcache performance: lookups = 21 / hit rate = 14%
 # hash-table stats:
-# Load=17/8192=0%, Rehash=0, Collisions=1/20=5%
-# Finished Make data base on Wed May 18 09:13:44 2022
+# Load=18/8192=0%, Rehash=0, Collisions=1/21=5%
+# Finished Make data base on Tue May 24 10:14:03 2022
 
  
+make: *** No rule to make target 'all'.  Stop.
+

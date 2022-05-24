@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 09:02:40
- * @LastEditTime: 2022-05-24 16:10:49
+ * @LastEditTime: 2022-05-24 17:40:25
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -26,15 +26,13 @@ Reactor::Reactor(): looping_(false),  eventHandling_(false), poller_(),
      quit_(false), callingPendingFunctors_(false), 
     threadId_(CurrentThread::tid())
 {
-    wakeupFd_ = createEventFd();
-    std::cout << "wakeupFd_ in thread" << CurrentThread::tid() << " is" << wakeupFd_ << std::endl;  
+    wakeupFd_ = createEventFd(); 
     pWakeupChannel = std::make_shared<Channel>(this, wakeupFd_);
     //pWakeupChannel = 
     pWakeupChannel->setReadHandler(std::bind(&Reactor::handleRead, this)); //主Reactor所需要使用的Handler
     pWakeupChannel->setConnHandler(std::bind(&Reactor::handleConn, this)); 
     pWakeupChannel->eventFlag_ = EPOLLIN | EPOLLET;
     poller_.epoll_add(pWakeupChannel, 0);
-    std::cout << CurrentThread::name() << " in thread " << CurrentThread::tid() << std::endl;
 };
 
 Reactor::~Reactor(){
@@ -48,7 +46,7 @@ void Reactor::quit(){
     }
 }
 void Reactor::loop(){
-    std::cout << "in Reactor::loop()" << std::endl;
+    std::cout << "*** Reactor::loop() ***" << std::endl;
     assert(!looping_);
     assert(CurrentThread::tid() == threadId_);
     looping_ = true;
@@ -96,7 +94,7 @@ void Reactor::wakeup(){
 }
 
 void Reactor::handleRead(){
-    std::cout << "Reactor::handleRead()" << std::endl;
+    std::cout << "*** Reactor::handleRead() ***" << std::endl;
     uint64_t wakeupSignal = 0;
     ssize_t n = readn(wakeupFd_, (char*)&wakeupSignal, sizeof wakeupSignal);
     if(n != sizeof wakeupSignal){
@@ -108,21 +106,19 @@ void Reactor::handleRead(){
 
 
 void Reactor::handleConn(){
-    std::cout << "Reactor::handleConn()" << std::endl;
+    std::cout << "*** Reactor::handleConn() ***" << std::endl;
     poller_.epoll_modify(pWakeupChannel, 0); // 更新wakeupChannel的eventFlag
 }
 
 void Reactor::doPendingFunctors(){
-    std::cout << "Reactor::doPendingFunctors()" << std::endl;
+    std::cout << "*** Reactor::doPendingFunctors() ***" << std::endl;
     std::vector<Functor> functors;
     callingPendingFunctors_ = true;
     {
         MutexLockGuard guard(mutex_);
         functors.swap(pendingFunctors_); //swao data with another vector
     }
-    std::cout << "Reactor::doPendingFunctors() -- 2" << std::endl;
     for(size_t i = 0;i < functors.size();i++) functors[i]();
-    std::cout << "Reactor::doPendingFunctors() -- 3" << std::endl;
     callingPendingFunctors_ = false;
 }
 

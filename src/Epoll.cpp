@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 14:15:47
- * @LastEditTime: 2022-05-18 19:33:54
+ * @LastEditTime: 2022-05-24 17:21:14
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -54,7 +54,8 @@ void Epoll::epoll_delete(std::shared_ptr<Channel> channel, int timeout){
     struct epoll_event ep_event;
     ep_event.data.fd = channelFd;
     ep_event.events = channel -> eventFlag_;
-    fd2channel.erase(channelFd);
+    //fd2channel.erase(channelFd);
+    fd2channel[channelFd].reset();
     /* Change file descriptor epoll_event structure.  */
     if(epoll_ctl(epollFd_, EPOLL_CTL_DEL, channelFd, &ep_event) < 0){
         std::cout << "Error occur in epoll_delete" << std::endl;

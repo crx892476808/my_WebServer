@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 17:14:46
- * @LastEditTime: 2022-05-24 12:00:13
+ * @LastEditTime: 2022-05-24 17:51:53
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 void Server::mainReactorHandleRead(){
-    std::cout << "Server::mainReactorHandleRead()" << std::endl;
+    std::cout << "*** Server::mainReactorHandleRead() ***" << std::endl;
     int acceptFd = acceptChannel_->fd_;
     socklen_t clientAddrLen = sizeof(sockaddr_in);
     struct sockaddr_in clientAddr;
@@ -40,13 +40,13 @@ void Server::mainReactorHandleRead(){
     httpChannel->setConnHandler(bind(&HttpHandler::HttpConnHandle, httpHandler));
     httpChannel->eventFlag_ = EPOLLIN | EPOLLET;
     //selectedSubReactor->poller_.epoll_add(httpChannel,0);
-    selectedSubReactor->queueInLoop(std::bind(&HttpHandler::bindToChannel,httpHandler));
+    selectedSubReactor->queueInLoop(std::bind(&HttpHandler::bindToChannel,httpHandler)); //不直接进行epoll_add，是希望这个操作放到subReactor线程做，避免线程安全问题
     //通知分配新连接这件事情发生了(修改后，这一步已经放到了runInLoop一并完成)
     //selectedSubReactor->wakeup();    
 }
 
 void Server::mainReactorHandleConn(){
-    std::cout << "Server::mainReactorHandleConn()" << std::endl;
+    std::cout << "*** Server::mainReactorHandleConn() ***" << std::endl;
     acceptChannel_->eventFlag_ = EPOLLIN | EPOLLET;
     mainReactor_->poller_.epoll_modify(acceptChannel_, 0);
 }

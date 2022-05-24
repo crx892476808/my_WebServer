@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 08:26:41
- * @LastEditTime: 2022-05-21 13:54:45
+ * @LastEditTime: 2022-05-24 17:46:03
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -54,9 +54,7 @@ ssize_t writen(int fd, std::string &str){
     ssize_t nWriteSum = 0;
     const char *buff = str.c_str();
     while(nLeft > 0){
-        
         nWritten = write(fd, (const void*)buff, nLeft);
-        std::cout << "write " << nWritten << "bytes" << std::endl;
         if(nWritten <= 0){
             if(errno == EINTR){ //errno 用来保存最后的错误代码; EINTR:Interrupted system call，由于信号中断，没写成功任何数据
                 nWritten = 0;
@@ -113,10 +111,7 @@ ssize_t readn(int fd, std::string &str, bool &readZeroByte){
     size_t readSum = 0;
     while(true){
         char buff[MAX_BUFF];
-        std::cout << "before readn::read" << std::endl;
         nRead = read(fd, buff, MAX_BUFF);
-        std::cout << "after readn::read" << std::endl;
-        std::cout << "nRead = " << nRead << std::endl;
         if(nRead < 0){//meets error or finish Reading
             if(errno == EINTR){
                 continue;
@@ -134,7 +129,6 @@ ssize_t readn(int fd, std::string &str, bool &readZeroByte){
         }
         readSum += nRead;
         str += std::string(buff, buff + nRead);
-        std::cout << "str == " << str << std::endl;
     }
     return readSum;
 }

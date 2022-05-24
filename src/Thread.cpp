@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-10 11:59:10
- * @LastEditTime: 2022-05-17 14:05:01
+ * @LastEditTime: 2022-05-24 16:53:19
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -28,7 +28,7 @@ __thread int t_tidStringLength = 6;
 __thread const char* t_threadName = "default";
 }
 
-// 为了在线程中保留name, tid这些数据
+// 原项目中的注释：为了在线程中保留name, tid这些数据
 struct ThreadData{
     Thread::ThreadFunc func_;
     std::string name_;
@@ -117,18 +117,19 @@ int Thread::join(){
 
 
 // Reactor related
-Reactor* Thread::startLoop(){
+Reactor* Thread::startLoop(){ //如果这里不加锁，则返回的Reactor可能就为空
     assert(!started_);
     start();
     {
         MutexLockGuard lock(mutex_);
         //一直等到threadFun在Thread里真正跑起来
+        //注意这个函数是在主线程被调用
         while(reactor_ == nullptr) cond_.wait(); // 这个cond_用于 reactor_ == nullptr 的判断
     }
     return reactor_;
 }
 
-void Thread::threadFunc(){
+void Thread::threadFunc(){ //注意这个函数是子线程的起点
     Reactor reactor;
     {
         MutexLockGuard lock(mutex_);

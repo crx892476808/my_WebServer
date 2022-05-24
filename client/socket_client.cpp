@@ -10,6 +10,11 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+std::string str = "GET / HTTP/1.1" \
+"Host: 10.176.35.12:8000" \
+"User-Agent: curl/7.58.0"
+"Accept: *//*";
+
 int main() {
     std::cout << "This is client" << std::endl;
     // socket
@@ -32,7 +37,7 @@ int main() {
     char buf[255];
     while (true) {
         std::cin >> data;
-        if(send(client, data, strlen(data), 0) > 0)
+        if(send(client, str.c_str(), str.size(), 0) > 0)
             std::cout << "client send finish" << std::endl;
         if (strcmp(data, "exit") == 0) {
             std::cout << "...disconnect" << std::endl;
