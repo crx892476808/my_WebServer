@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 17:14:46
- * @LastEditTime: 2022-05-18 15:48:22
+ * @LastEditTime: 2022-05-24 12:00:13
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -27,18 +27,22 @@ void Server::mainReactorHandleRead(){
     inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
     std::cout << "...connect " << clientIP << ":" << ntohs(clientAddr.sin_port) << std::endl; //`sin`的意思是socket_internet
 
-    //TODO: 将connFd分给某个SubReactor的poller
+    //将connFd分给某个SubReactor的poller
     Reactor* selectedSubReactor = threadPool_->getNextReactor();
-    //将fd设为非阻塞式
+    //将fd设为非阻塞式，不延迟
     setSocketNonBlocking(connFd);
+    setSocketNodelay(connFd);
+    
     std::shared_ptr<Channel> httpChannel(new Channel(selectedSubReactor,connFd));
-    std::shared_ptr<HttpHandler> httpc = std::make_shared<HttpHandler>(httpChannel);
-    httpChannel->setReadHandler(bind(&HttpHandler::HttpReadHandle, httpc));
-    httpChannel->setConnHandler(bind(&HttpHandler::HttpConnHandle, httpc));
+    std::shared_ptr<HttpHandler> httpHandler = std::make_shared<HttpHandler>(httpChannel);
+    httpChannel->setHttpHandler(httpHandler);
+    httpChannel->setReadHandler(bind(&HttpHandler::HttpReadHandle, httpHandler));
+    httpChannel->setConnHandler(bind(&HttpHandler::HttpConnHandle, httpHandler));
     httpChannel->eventFlag_ = EPOLLIN | EPOLLET;
-    selectedSubReactor->poller_.epoll_add(httpChannel,0);
-    //通知分配新连接这件事情发生了
-    selectedSubReactor->wakeup();    
+    //selectedSubReactor->poller_.epoll_add(httpChannel,0);
+    selectedSubReactor->queueInLoop(std::bind(&HttpHandler::bindToChannel,httpHandler));
+    //通知分配新连接这件事情发生了(修改后，这一步已经放到了runInLoop一并完成)
+    //selectedSubReactor->wakeup();    
 }
 
 void Server::mainReactorHandleConn(){

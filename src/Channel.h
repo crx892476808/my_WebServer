@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 13:11:31
- * @LastEditTime: 2022-05-17 17:34:55
+ * @LastEditTime: 2022-05-24 12:02:25
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -9,8 +9,9 @@
 #pragma once
 #include <functional>
 #include <sys/epoll.h>
+#include <memory>
 class Reactor;
-
+class HttpHandler;
 class Channel{
 private:
     typedef std::function<void()> CallBack;
@@ -47,7 +48,7 @@ public:
         }
     }
 
-    
+    void setHttpHandler(std::shared_ptr<HttpHandler> httpHandler){httpHandler_ = httpHandler;}
 
 private:
     
@@ -57,7 +58,7 @@ private:
     CallBack errorHandler_;
     CallBack connHandler_;
 
-
+    std::shared_ptr<HttpHandler> httpHandler_;
 
 
 };

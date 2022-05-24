@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 08:41:15
- * @LastEditTime: 2022-05-17 20:36:25
+ * @LastEditTime: 2022-05-24 11:59:48
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -11,6 +11,7 @@
 #include<functional>
 #include<vector>
 #include<memory>
+class HttpHandler;
 class Reactor{
 public:
     typedef std::function<void()> Functor;
@@ -18,13 +19,14 @@ public:
     ~Reactor();
     void quit();
     void loop();
-    void runInLoop(Functor);
-    void queueInLoop(Functor);
+    void runInLoop(Functor&&);
+    void queueInLoop(Functor&&);
     void wakeup();//当前线程唤醒该Reactor对应的子线程
 
 private:
     bool looping_; // 是否处于Reactor::loop()过程中
     bool eventHandling_; //是否在loop()中处于处理每个事件的阶段
+    
 public:
     Epoll poller_;
 private:
@@ -42,4 +44,8 @@ private:
     void doPendingFunctors(); //将pendingFunctors_中的函数逐个取出完成
 public:
     void mainReactorHandleRead(); //主Reactor接收到读事件，也就是有新的连接被建立
+
+    void addChannel(std::shared_ptr<Channel> channel, int timeout);
+
+    
 };

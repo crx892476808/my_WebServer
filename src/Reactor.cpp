@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 09:02:40
- * @LastEditTime: 2022-05-18 15:38:59
+ * @LastEditTime: 2022-05-24 16:10:49
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -68,19 +68,19 @@ void Reactor::loop(){
     
 }
 
-void Reactor::runInLoop(Functor f){
+void Reactor::runInLoop(Functor &&f){
     if(threadId_ == CurrentThread::tid()){
         f();
     }
     else{
-        queueInLoop(f);
+        queueInLoop(std::move(f));
     }
 }
 
-void Reactor::queueInLoop(Functor f){
+void Reactor::queueInLoop(Functor &&f){
     {
         MutexLockGuard guard(mutex_);
-        pendingFunctors_.push_back(f);
+        pendingFunctors_.push_back(std::move(f));
     }
     if(threadId_ != CurrentThread::tid()){
         wakeup();
@@ -113,12 +113,19 @@ void Reactor::handleConn(){
 }
 
 void Reactor::doPendingFunctors(){
+    std::cout << "Reactor::doPendingFunctors()" << std::endl;
     std::vector<Functor> functors;
     callingPendingFunctors_ = true;
     {
         MutexLockGuard guard(mutex_);
         functors.swap(pendingFunctors_); //swao data with another vector
     }
+    std::cout << "Reactor::doPendingFunctors() -- 2" << std::endl;
     for(size_t i = 0;i < functors.size();i++) functors[i]();
+    std::cout << "Reactor::doPendingFunctors() -- 3" << std::endl;
     callingPendingFunctors_ = false;
+}
+
+void Reactor::addChannel(std::shared_ptr<Channel> channel, int timeout){
+    poller_.epoll_add(channel,0);
 }

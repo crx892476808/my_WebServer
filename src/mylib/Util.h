@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 08:22:56
- * @LastEditTime: 2022-05-18 14:50:39
+ * @LastEditTime: 2022-05-21 11:57:45
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -18,3 +18,4 @@ ssize_t readn(int fd, std::string &str, bool &isReadZero);
 
 //fd management
 int setSocketNonBlocking(int fd);
+void setSocketNodelay(int fd);

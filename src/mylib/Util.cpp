@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 08:26:41
- * @LastEditTime: 2022-05-18 19:25:32
+ * @LastEditTime: 2022-05-21 13:54:45
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -56,6 +56,7 @@ ssize_t writen(int fd, std::string &str){
     while(nLeft > 0){
         
         nWritten = write(fd, (const void*)buff, nLeft);
+        std::cout << "write " << nWritten << "bytes" << std::endl;
         if(nWritten <= 0){
             if(errno == EINTR){ //errno 用来保存最后的错误代码; EINTR:Interrupted system call，由于信号中断，没写成功任何数据
                 nWritten = 0;
@@ -145,4 +146,9 @@ int setSocketNonBlocking(int fd){
   flag |= O_NONBLOCK;
   if (fcntl(fd, F_SETFL, flag) == -1) return -1;
   return 0;
+}
+
+void setSocketNodelay(int fd) { // Don't delay send to coalesce packets 
+  int enable = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable)); //TCP_NODELAY: Don't delay send to coalesce packets 
 }
