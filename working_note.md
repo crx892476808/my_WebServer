@@ -1,3 +1,9 @@
+# 重要参考
+
+[muduo源码剖析](https://zhuanlan.zhihu.com/p/85101271)
+
+《Linux多线程服务器端编程》
+
 # Day0 20220501-20220509
 
 先将整个项目大致读了一下，加上gdb调试，有了一些自己的理解。
@@ -191,9 +197,11 @@ TODO: 结合原项目的EventLoopThread，把Thread完成
 
 笔记：
 
-1 Thread::startLoop()之后的调用关系：Thread::startLoop() -> Thread::start()(这一步创建新线程) -> ::startThread() -> ThreadData::runInThread() -> func_() (也就是reactor->loop()) 
+1 父线程：ThreadPool::start()创建Thread对象（此时pthread还未被创建），随后调用Thread::startLoop()，Thread::startLoop()之后的调用关系：Thread::startLoop() -> Thread::start()(这一步创建pthread) -> 
 
-2 在最初始的位置，会由ThreadPool::start()调用Thread::startLoop()
+子线程：pthread创建后调用::startThread() -> ThreadData::runInThread() -> ThreadData::func_() (也就是Thread::threadFunc)  -> Thread::reactor.loop()
+
+
 
 问题：
 
@@ -201,7 +209,266 @@ TODO: 结合原项目的EventLoopThread，把Thread完成
 
 2 为什么需要用CountDownLatch控制 "确保func_确实执行后，Thread::start()才返回"
 
-
+将latch.wait注释掉，也并没有报错（考虑到和原项目的统一性，还是保留Latch）
 
 ## ThreadPool类
 
+基本完成了ThreadPool（能够启多个线程）
+
+TODO: 开始写Reactor（需要先写Handler类）
+
+
+
+# Day3 20220515
+
+## 原项目Channel类的分析
+
+实际进行监听，获取事件发生消息的仍然是Reactor类。原先的实现耦合了Event和Handler（称为channel）
+
+理论上，伪代码应该是
+
+```
+for event in new_events
+	handler.handle(event)
+```
+
+原项目的伪代码是
+
+```
+for channel in channels
+	channel.handle()
+```
+
+![并发模型](media/model.png)
+
+（注意主从reactor架构下，从reactor可以有一个，也可以有多个）
+
+（突然能够理解为什么原项目命名为channel了，因为channel本质上是main Reactor 交给SubReactor的已创建连接，相当于是和远端的用户建立了信道（channel））
+
+（进一步拓展原来的想法，channel还是主reactor去唤醒从reactor的“信道”，其不止关联了一个事件（比如可能包含读事件, 后续可能会有写事件等））
+
+（因此，原项目实际上有两类Channel，一类是主Reactor与从Reactor之间的Channel，在这里出现的事件是主Reactor要将接收的连接分配给从Reacotr，对从Reactor唤醒；另一类是从Reactor和Web客户端之间的Channel，这里出现的事件就是HTTP读写事件）
+
+（原项目中 EventLoop 和 HttpData的联系方式就是将HttpData对应的文件描述符加入到poller_监听的列表里）
+
+## Epoll类
+
+封装了Linux的epoll相关方法
+
+目前完成了epoll_create和poll()方法
+
+
+
+# Day4 20220516
+
+## 架构变更
+
+为什么原项目把Event+Handler打包放在Channel里？**因为将Event的Handle方式通过泛型函数的方式指定，是合理的。外部用户可以直接对每一个单独的event绑定相应的handler。**从而可以直接通过event->handle去调用其处理方法。
+
+如果分开来，handler就需要维护一个mapping，映射事件类型到相应的处理函数，每次调用都需要做映射后调用，并不自然。
+
+重新使用Channel的名称，但是将原先的HttpData改为HttpChannel，明确其作用。
+
+## Channel类
+
+**Channel表示“事件所发生在的通信信道”**
+
+原项目中的HttpData类实际上封装了 “subReactor到用户的TCP/Http通信信道”
+
+原项目中的Server类包含了对新连接处理的回调函数
+
+## Reactor类
+
+### eventfd系统调用
+
+> eventfd是linux 2.6.22后系统提供的一个轻量级的进程间通信的系统调用，eventfd通过一个进程间共享的64位计数器完成进程间通信，这个计数器在linux内核空间维护，用户可以通过调用write方法向内核空间写入一个64位的值，也可以调用read方法读取这个值。
+
+新建
+
+```cpp
+#include <sys/eventfd.h>
+int eventfd(unsigned int initval, int flags);
+//flags:
+//EFD_CLOEXEC : fork子进程时不继承，对于多线程的程序设上这个值不会有错的。
+//EFD_NONBLOCK: 文件会被设置成O_NONBLOCK，读操作不阻塞。若不设置，一直阻塞直到计数器中的值大于0。
+//EFD_SEMAPHORE : 支持 semophore 语义的read，每次读操作，计数器的值自减1。
+```
+
+读操作(读计数器中的值)
+
+```cpp
+typedef uint64_t eventfd_t;
+int eventfd_read(int fd, eventfd_t *value);
+```
+
+1. 如果计数器中的值大于0：
+
+- 设置了 `EFD_SEMAPHORE` 标志位，则返回1，且计数器中的值也减去1。
+- 没有设置 `EFD_SEMAPHORE` 标志位，则返回计数器中的值，且计数器置0。
+
+1. 如果计数器中的值为0：
+
+- 设置了 `EFD_NONBLOCK` 标志位就直接返回-1。
+- 没有设置 `EFD_NONBLOCK` 标志位就会一直阻塞直到计数器中的值大于0。
+
+写操作(向计数器中写入值)
+
+```cpp
+int eventfd_write(int fd, eventfd_t value);
+```
+
+1. 如果写入值的和小于0xFFFFFFFFFFFFFFFE，则写入成功
+2. 如果写入值的和大于0xFFFFFFFFFFFFFFFE
+
+- 设置了 `EFD_NONBLOCK` 标志位就直接返回-1。
+- 如果没有设置 `EFD_NONBLOCK` 标志位，则会一直阻塞直到read操作执行
+
+
+
+### 主Reactor分派新连接
+
+主Reactor也进行Reactor::loop()，所以要么是写在event的handle函数中，要么是写到pendingFunctors中。
+
+前者依赖于event read handler的重写，新建立ListenChannel类，专用于处理这部分事件。存在一个问题：所注册的事件处理函数并不是虚函数，这里强行使用继承的方式调用，需要强制类型转换，并且很不优雅。还有一种方式是不应用继承的方式，而是建立“组合”的关系。此时可以不变动原先Channel-> handleEvent()的处理。
+
+
+
+# Day6 20220518
+
+将原先的HttpData改为HttpHandle
+
+## HttpHandle类
+
+
+
+### 无法处理多个连接
+
+只有第一个连接可以正常建立，第二个连接一来就阻塞了？（已经解决，还是没有设置fd状态的问题）
+
+### 已建立连接关闭时处理异常
+
+无限循环在HttpChannel::handleRead 和 HttpChannel::handleConn中。（已解决，在HttpHandleConn的地方删除Fd）
+
+# Day7 20220520 
+
+TODO: 
+
+0 架构上，确认原项目中的pendingFunctors到底是干什么的。
+
+在Server::handleNewConn中，EventLoop::queueInLoop会将对HttpChannel的fd.events设置以及addToPoller这两个动作对应的函数放到**子Reactor**的pendingFunctors里面。
+
+不清楚为什么不直接在主Reactor直接执行上面两个动作。
+
+
+
+1 完成基础的HTTP连接？
+
+边缘触发：只会在状态变化时被触发（只触发一次）
+
+> **水平触发(level-triggered，也被称为条件触发)LT:** 只要满足条件，就触发一个事件(只要有数据没有被获取，内核就不断通知你)
+> **边缘触发(edge-triggered)ET:** 每当状态变化时，触发一个事件
+>
+> > 举个读socket的例子，假定经过长时间的沉默后，现在来了100个字节，这时无论边缘触发和条件触发都会产生一个read ready notification通知应用程序可读。应用程序读了50个字节，然后重新调用api等待io事件。这时水平触发的api会因为还有50个字节可读从 而立即返回用户一个read ready notification。而边缘触发的api会因为可读这个状态没有发生变化而陷入长期等待。 因此在使用边缘触发的api时，要注意每次都要读到socket返回EWOULDBLOCK为止，否则这个socket就算废了。而使用条件触发的api 时，如果应用程序不需要写就不要关注socket可写的事件，否则就会无限次的立即返回一个write ready notification。大家常用的select就是属于水平触发这一类，长期关注socket写事件会出现CPU 100%的毛病。
+
+Http Request 示例
+
+```
+GET / HTTP/1.1
+Host: 10.176.35.12:8000
+User-Agent: curl/7.58.0
+Accept: */*
+```
+
+# Day8 20220521
+
+## 解决Http读写的一些问题
+
+出现了writen后客户端无法接收到即时返回消息的情况
+
+在对文件描述符的写操作加上\r\n后可以解决。
+
+但这并不合理......
+
+实测直接用socket的recv操作，可以不加\r\n就能顺利读出
+
+查到最后发现是HttpRequest没有带ContentLength，导致读出不正常
+
+添加上正确的ContentLength后读出正常
+
+# Day9 20220522
+
+## 总结一下目前的问题和后续的实现
+
+问题
+
+### 1 还是没搞清楚pendingFunctors到底是做什么用的？
+
+总结一下，”希望把某些动作放到IO线程来做，以避免出现线程安全问题“
+
+在我们的HttpHandle中，实际上就是把add_to_poller的操作放到了IO线程来做，避免出现线程安全问题？是这样吗？
+
+并且，原项目包含了对Timer的操作，书本中，Timer操作是铁定要保证线程安全，因此会统一放在所属IO线程上去完成。
+
+而在我们的项目中，考虑到存在以下的数据结构（epollFd_需要维护为红黑树的结构），因此同样需要避免线程安全问题，所以需要使用pendingFunctors的方式来进入IO线程
+
+```cpp
+std::unordered_map<int, std::shared_ptr<Channel>> fd2channel;
+void Epoll::epoll_add(std::shared_ptr<Channel> channel, int timeout){ //添加所要监听的文件描述符
+    int eventFd = channel->fd_;
+    //TODO: Add timer 
+    struct epoll_event ep_event; //The events member is a bit mask composed by ORing together zero or more of the following available event types
+    ep_event.data.fd = eventFd;  
+    ep_event.events = channel->eventFlag_;
+    fd2channel[eventFd] = channel;
+    if(epoll_ctl(epollFd_, EPOLL_CTL_ADD, eventFd, &ep_event) < 0){
+        std::cout << "Error occur in epoll_add" << std::endl;
+    }
+}
+```
+
+
+
+### 2 在线程和线程库的地方，没搞清楚那些锁的作用
+
+Thread中大量使用了Mutex。
+
+主要是为了确保线程创建过程中的正确性（保证子线程运行到相应位置后，父线程才继续运行后面的代码）
+
+（结合书本考虑一下）
+
+## TODO
+
+1 实现连接关闭的正确处理（目前似乎在epoll_delete的位置还是有问题）
+
+2 refractor一下
+
+# Day10 20220524
+
+## 尝试实现优雅的连接关闭
+
+### 关于close 和 epoll_ctl(delete)
+
+>  ![img](https://pic1.zhimg.com/80/7d4036832aaa88d7b5c3af0a2e89ebb2_720w.jpg?source=1940ef5c)
+
+
+
+>  感觉题主其实是在问：epoll_ctl(epfd,EPOLL_CTL_DEL,sockfd,&amp;ev); 和 close(sockfd); 这两句话有必要同时存在吗？
+
+>  要是你能确定你的close不是只减少了fd的一个引用计数，而是实打实地把引用计数从1减为0（只有这时close才会真正地去close一个fd），那才能说epoll会自动把这个socket的fd从监听队列中删除。
+
+> 所以EPOLL_CTL_DEL的作用就是确保把这个socket的fd从监听队列中删除，不管你的close到底只是减少了一个引用计数还是真正地去close了一下。
+
+> 否则注册EPOLL_CTL_DEL事件岂不就真的毫无用处了吗？
+
+> 作者：文武双缺
+> 链接：https://www.zhihu.com/question/19804426/answer/96510492
+> 来源：知乎
+> 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+### 修正方式
+
+将原先epoll_ctl和close共用的方式改为了仅使用close，能够避免error in close
+
+# Day11 20220525
+
+还有什么可以做的吗？
