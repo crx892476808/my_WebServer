@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 09:02:40
- * @LastEditTime: 2022-05-24 17:40:25
+ * @LastEditTime: 2022-06-08 18:29:47
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -20,6 +20,10 @@ int createEventFd(){
         abort();
     }
     return eventFd;
+}
+
+void Reactor::assertInReactorThread(){
+    assert(CurrentThread::tid() == threadId_);
 }
 
 Reactor::Reactor(): looping_(false),  eventHandling_(false), poller_(),
@@ -120,6 +124,7 @@ void Reactor::doPendingFunctors(){
     }
     for(size_t i = 0;i < functors.size();i++) functors[i]();
     callingPendingFunctors_ = false;
+    std::cout << "*** Reactor::doPendingFunctors() Finish***" << std::endl;
 }
 
 void Reactor::addChannel(std::shared_ptr<Channel> channel, int timeout){

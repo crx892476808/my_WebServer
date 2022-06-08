@@ -1,12 +1,13 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-16 23:41:41
- * @LastEditTime: 2022-05-17 17:16:07
+ * @LastEditTime: 2022-06-08 17:52:46
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
 
 #include "Channel.h"
+#include "Reactor.h"
 #include <iostream>
 
 
@@ -16,3 +17,7 @@ Channel::Channel(Reactor* reactor, int fd):
     lastEventFlag_(0), reactor_(reactor) {
 }
 
+void Channel::enableReading(){
+    this->eventFlag_ = EPOLLIN | EPOLLPRI | EPOLLOUT;
+    reactor_->addChannel(this, 0);
+}

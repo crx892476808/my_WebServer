@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 13:11:31
- * @LastEditTime: 2022-05-24 12:02:25
+ * @LastEditTime: 2022-06-08 18:20:47
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -10,6 +10,7 @@
 #include <functional>
 #include <sys/epoll.h>
 #include <memory>
+#include<iostream>
 class Reactor;
 class HttpHandler;
 class Channel{
@@ -29,7 +30,10 @@ public:
     void setErrorHandler(CallBack errorHandler){errorHandler_ = errorHandler;}
     void setConnHandler(CallBack connHandler){connHandler_ = connHandler;}
 
+    void enableReading();
+
     void handleEvent(){
+        std::cout << "*** Channel::handleEvent() ***" << std::endl;
         if( (returnEventFlag_ & EPOLLHUP) && !(returnEventFlag_ & EPOLLIN)){ //EPOLLHUP表示文件被挂断。EPOLLIN表示有新数据到达，socket可读，或对端写通道关闭
             //TODO: handle error
         }

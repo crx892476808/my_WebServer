@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 17:14:46
- * @LastEditTime: 2022-05-24 17:51:53
+ * @LastEditTime: 2022-06-01 08:34:23
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -39,10 +39,8 @@ void Server::mainReactorHandleRead(){
     httpChannel->setReadHandler(bind(&HttpHandler::HttpReadHandle, httpHandler));
     httpChannel->setConnHandler(bind(&HttpHandler::HttpConnHandle, httpHandler));
     httpChannel->eventFlag_ = EPOLLIN | EPOLLET;
-    //selectedSubReactor->poller_.epoll_add(httpChannel,0);
     selectedSubReactor->queueInLoop(std::bind(&HttpHandler::bindToChannel,httpHandler)); //不直接进行epoll_add，是希望这个操作放到subReactor线程做，避免线程安全问题
-    //通知分配新连接这件事情发生了(修改后，这一步已经放到了runInLoop一并完成)
-    //selectedSubReactor->wakeup();    
+    //通知分配新连接这件事情发生了(修改后，这一步已经放到了queueInLoop->runInLoop一并完成)  
 }
 
 void Server::mainReactorHandleConn(){

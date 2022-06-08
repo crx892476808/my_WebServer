@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 08:41:15
- * @LastEditTime: 2022-05-24 11:59:48
+ * @LastEditTime: 2022-06-08 17:37:16
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -46,6 +46,11 @@ public:
     void mainReactorHandleRead(); //主Reactor接收到读事件，也就是有新的连接被建立
 
     void addChannel(std::shared_ptr<Channel> channel, int timeout);
+    void addChannel(Channel *channel, int timeout){
+        poller_.epoll_add(channel,0);
+    }
+
+    void assertInReactorThread();//
 
     
 };
