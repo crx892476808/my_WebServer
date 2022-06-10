@@ -33,7 +33,7 @@ private:
 
     Reactor* reactor_;
     const int timerfd_;
-    Channel timerfdChannel_;
+    std::shared_ptr<Channel> timerfdChannel_;
     // Timer list sorted by expiration
     TimerList timers_;
     bool callingExpiredTimers_;

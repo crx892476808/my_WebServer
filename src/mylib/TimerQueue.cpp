@@ -54,12 +54,12 @@ static void resetTimerfd(int timerfd, Timestamp expiration){
 TimerQueue::TimerQueue(Reactor* reactor):
     reactor_(reactor), 
     timerfd_(createTimerfd()),
-    timerfdChannel_(reactor, timerfd_),
+    timerfdChannel_(new Channel(reactor, timerfd_)),
     timers_()
 {
-    timerfdChannel_.setReadHandler(std::bind(&TimerQueue::handleRead, this));
-    timerfdChannel_.enableReading();
-
+    timerfdChannel_->setReadHandler(std::bind(&TimerQueue::handleRead, this));
+    timerfdChannel_->eventFlag_ = EPOLLIN | EPOLLPRI;
+    reactor_->addChannel(timerfdChannel_, 0);
 }
 
 TimerQueue::~TimerQueue(){
