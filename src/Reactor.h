@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 08:41:15
- * @LastEditTime: 2022-06-08 17:37:16
+ * @LastEditTime: 2022-06-11 17:44:59
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -37,6 +37,7 @@ private:
     bool callingPendingFunctors_; //是否处于调用pending Functor调用过程中
     const pid_t threadId_;
     std::shared_ptr<Channel> pWakeupChannel;
+    std::shared_ptr<TimerQueue> timerQueue_;
     
     
     void handleRead(); //处理"被唤醒"事件
@@ -51,6 +52,15 @@ public:
     }
 
     void assertInReactorThread();//
+
+    TimerId runAt(Timestamp time, Timer::TimerCallback cb){
+        return timerQueue_->addTimer(std::move(cb), time, 0.0);
+    }
+
+    TimerId runAfter(double delayInSeconds, Timer::TimerCallback cb){
+        Timestamp time(addTime(Timestamp::now(), delayInSeconds));
+        return runAt(time, std::move(cb));
+    }
 
     
 };

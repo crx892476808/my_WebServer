@@ -25,6 +25,8 @@ public:
     //must be thread safe, usually be called from other threads
     //repeats if @c interval > 0.0
     TimerId addTimer(Timer::TimerCallback cb, Timestamp when, double interval); // when表示调用回调函数cb的时间
+    void cancelTimer(TimerId timerId);
+    void cancelTimerInLoop(Timer* timer);
 
 private:
     typedef std::pair<Timestamp, Timer*> TimerEntry;

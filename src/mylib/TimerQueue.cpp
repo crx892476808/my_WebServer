@@ -100,6 +100,14 @@ TimerId TimerQueue::addTimer(Timer::TimerCallback cb, Timestamp when, double int
     return TimerId(timer, timer->sequence());
 }
 
+void TimerQueue::cancelTimer(TimerId timerId){
+
+}
+
+void TimerQueue::cancelTimerInLoop(Timer* timer){
+    reactor_->assertInReactorThread();
+}
+
 void TimerQueue::addTimerInLoop(Timer* timer){
     std::cout << "*** TimerQueue::addTimerInLoop ***" <<std::endl;
     reactor_->assertInReactorThread();

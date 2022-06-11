@@ -163,7 +163,9 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "string": "cpp"
     },
     //"editor.formatOnType": true,
 
