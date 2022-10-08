@@ -121,6 +121,7 @@ void HttpHandler::HttpReadHandle(){
     // write reply to connFd
     writen(connFd, response_str);
     //close(connFd);
+    shouldBeClose_ = true; // 强制短连接
     
     
 }
@@ -130,7 +131,7 @@ void HttpHandler::HttpConnHandle(){
     if(shouldBeClose_){
         
         channel_->reactor_->poller_.epoll_delete(channel_,0);
-        //close(channel_->fd_);
+        close(channel_->fd_);
         return;
     }
     channel_->eventFlag_ = EPOLLIN | EPOLLET;
