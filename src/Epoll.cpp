@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-15 14:15:47
- * @LastEditTime: 2022-06-08 18:19:42
+ * @LastEditTime: 2022-06-13 00:42:28
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -37,19 +37,6 @@ void Epoll::epoll_add(std::shared_ptr<Channel> channel, int timeout){ //添加�
     }
 }
 
-void Epoll::epoll_add(Channel* channel, int timeout){ //添加所要监听的文件描述符
-    std::cout << "*** epoll_add(Channel *) ***" << std::endl;
-    int eventFd = channel->fd_;
-    //TODO: Add timer 
-    struct epoll_event ep_event; //The events member is a bit mask composed by ORing together zero or more of the following available event types
-    ep_event.data.fd = eventFd;  
-    ep_event.events = channel->eventFlag_;
-    fd2channel[eventFd] = std::shared_ptr<Channel>(channel);
-    fd2channelStar[eventFd] = channel;
-    if(epoll_ctl(epollFd_, EPOLL_CTL_ADD, eventFd, &ep_event) < 0){
-        std::cout << "Error occur in epoll_add" << std::endl;
-    }
-}
 
 void Epoll::epoll_modify(std::shared_ptr<Channel> channel, int timeout){
     int channelFd = channel -> fd_;
@@ -93,7 +80,6 @@ std::vector<std::shared_ptr<Channel>> Epoll::getEvents(int event_count){
     std::vector<std::shared_ptr<Channel>> events;
     for(int i = 0;i != event_count;i++){
         std::shared_ptr<Channel> eventPtr = fd2channel[epollEvents_[i].data.fd];
-        if(fd2channelStar[epollEvents_[i].data.fd] != nullptr) eventPtr = std::shared_ptr<Channel>(fd2channelStar[epollEvents_[i].data.fd]);
         if(eventPtr){
             eventPtr->returnEventFlag_ = epollEvents_[i].events;
             eventPtr->eventFlag_ = 0;

@@ -1,13 +1,14 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-11 08:41:15
- * @LastEditTime: 2022-06-11 17:44:59
+ * @LastEditTime: 2022-06-13 00:39:24
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
 #pragma once
 #include"mylib/MutexLock.h"
 #include"Epoll.h"
+#include"mylib/TimerQueue.h"
 #include<functional>
 #include<vector>
 #include<memory>
@@ -47,9 +48,6 @@ public:
     void mainReactorHandleRead(); //主Reactor接收到读事件，也就是有新的连接被建立
 
     void addChannel(std::shared_ptr<Channel> channel, int timeout);
-    void addChannel(Channel *channel, int timeout){
-        poller_.epoll_add(channel,0);
-    }
 
     void assertInReactorThread();//
 

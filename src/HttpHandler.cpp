@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-17 19:28:29
- * @LastEditTime: 2022-06-01 11:50:29
+ * @LastEditTime: 2022-06-13 00:35:03
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -78,6 +78,10 @@ char favicon[555] = {
     'N',    'D',    '\xAE', 'B',    '\x60', '\x82',
 };
 
+HttpHandler::~HttpHandler(){
+    std::cout << "HttpHandler destructor called" << std::endl;
+    close(channel_->fd_);
+}
 
 void HttpHandler::parseHttpRequest(){
     //rawHttpRequest_

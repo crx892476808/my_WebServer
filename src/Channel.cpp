@@ -1,7 +1,7 @@
 /*** 
  * @Author: Armin Jager
  * @Date: 2022-05-16 23:41:41
- * @LastEditTime: 2022-06-08 17:52:46
+ * @LastEditTime: 2022-06-13 00:40:34
  * @LastEditors: Armin Jager
  * @Description: Date +8h
  */
@@ -19,5 +19,4 @@ Channel::Channel(Reactor* reactor, int fd):
 
 void Channel::enableReading(){
     this->eventFlag_ = EPOLLIN | EPOLLPRI | EPOLLOUT;
-    reactor_->addChannel(this, 0);
 }
